@@ -31,9 +31,23 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
+
+    const toysCollection = client.db("addedToys").collection("toys");
+
+    app.get("/addToys", async (req, res) => {
+      const cursor = toysCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.post("/addToys", async (req, res) => {
+      const newToys = req.body;
+      console.log(newToys);
+      const result = await toysCollection.insertOne(newToys);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
