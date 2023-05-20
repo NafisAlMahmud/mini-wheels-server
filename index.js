@@ -45,6 +45,13 @@ async function run() {
       const result = await toysCollection.insertOne(newToys);
       res.send(result);
     });
+    app.get("/addToys/:email", async (req, res) => {
+      console.log(req.params.email);
+      const toys = await toysCollection
+        .find({ email: req.params.email })
+        .toArray();
+      res.send(toys);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
