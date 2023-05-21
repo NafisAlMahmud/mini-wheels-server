@@ -34,15 +34,35 @@ async function run() {
 
     const toysCollection = client.db("addedToys").collection("toys");
 
-    // app.get("/allToys/:text", async (req, res) => {
-    //   console.log(req.params.text);
-    //   if (req.params.text === "car") {
-    //     const result = await toysCollection
-    //       .find({ category: req.params.text })
-    //       .toArray();
-    //     return result.send(result);
-    //   }
-    // });
+    // Creating index on two fields
+    const indexKeys = { title: 1, category: 1 }; // Replace field1 and field2 with your actual field names
+    const indexOptions = { name: "titleCategory" }; // Replace index_name with the desired index name
+    const result = await toysCollection.createIndex(indexKeys, indexOptions);
+    console.log(result);
+
+    app.get("/toysSearchByTitle/:text", async (req, res) => {
+      const searchText = req.params.text;
+
+      const result = await toysCollection
+        .find({
+          $or: [
+            { toysname: { $regex: searchText, $options: "i" } },
+            { category: { $regex: searchText, $options: "i" } },
+          ],
+        })
+        .toArray();
+
+      res.send(result);
+    });
+
+    app.get("/allToys/:text", async (req, res) => {
+      const result = await toysCollection
+        .find({
+          category: req.params.text,
+        })
+        .toArray();
+      res.send(result);
+    });
 
     app.get("/addToys", async (req, res) => {
       const cursor = toysCollection.find();
